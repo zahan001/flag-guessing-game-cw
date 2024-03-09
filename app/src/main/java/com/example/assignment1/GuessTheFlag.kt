@@ -404,7 +404,7 @@ fun RandomFlag(){
             modifier = Modifier.size(180.dp),
             contentAlignment = Alignment.Center
             ){
-            Image(
+            Image( // Display the flags
                 painter = randomImagePainter,
                 contentDescription = "Random Flag",
                 modifier = Modifier
