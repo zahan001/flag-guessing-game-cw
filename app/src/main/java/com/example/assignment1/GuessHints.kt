@@ -10,15 +10,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.example.assignment1.ui.theme.Assignment1Theme
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.modifier.modifierLocalMapOf
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,15 +33,7 @@ class GuessHints : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Assignment1Theme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-
-                }
-            }
+            Guessing()
         }
     }
 }
@@ -356,6 +353,9 @@ fun Guessing() {
         "ZW" to "Zimbabwe"
     )
 
+    // State to hold the current generated country code
+    var randomCountryKey by remember { mutableStateOf("") }
+
     // State variable to hold the index of the randomly selected flag image
     var randomIndex by remember { mutableStateOf(Random.nextInt(0, flagResourceIds.size)) }
 
@@ -365,8 +365,24 @@ fun Guessing() {
     // State variable to hold the name guessed by the user character by character
     var guessedName by remember { mutableStateOf("") }
 
-    // Painter for the flag image
-    val flagImagePainter: Painter = painterResource(id = flagResourceIds[randomIndex])
+    // Get the painter for the randomly selected flag
+    var flagImagePainter = painterResource(id = flagResourceIds[randomIndex])
+
+    // State to hold the user input
+    var userInput by remember { mutableStateOf("") }
+
+
+    // State to hold the dashes representing the country name
+    var dashesState by remember { mutableStateOf("") }
+
+
+
+    // Initialize the country name corresponding to the flag
+    LaunchedEffect(randomIndex) {
+        val countryCode = countryMap.keys.elementAt(randomIndex)
+        countryName = countryMap[countryCode] ?: ""
+        randomCountryKey = countryCode
+    }
 
     Column (
         modifier = Modifier.fillMaxSize(),
@@ -388,34 +404,45 @@ fun Guessing() {
         // Text box for user input
         BasicTextField(
             value = guessedName,
-            onValueChange = { guessedName = it },
+            onValueChange = { guessedName = it.take(1) },
             singleLine = true,
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth()
+                .height(50.dp)
+                .border(1.dp, Color.Gray, RoundedCornerShape(4.dp))
+                .background(Color.White),
+            textStyle = TextStyle.Default.copy(fontSize = 18.sp)
         )
+
+
 
         // submit button
         Button(onClick = {
-            if (guessedName.isNotEmpty()){
-                if (countryName.contains(guessedName, ignoreCase = false)){
-                    val indices = countryName.indices.filter { countryName[it].equals(guessedName[0], ignoreCase = true) }
-                    for (index in indices){
-                        countryName = countryName.replaceRange(index, index +1, guessedName.toUpperCase()
-                        )
+            // Update the dashes based on user input
+            val updatedDashesState = buildString {
+                // Iterate over each character in the country name
+                countryName.forEachIndexed { index, char ->
+                    // Check if the user input matches the character
+                    val guessedChar = guessedName.toLowerCase().getOrNull(index)
+                    if (guessedChar != null && guessedChar == char.lowercaseChar()) {
+                        // Character found in the country name, append it to the updated dashes state
+                        append(char)
+                    } else {
+                        // Character not found in the country name, append a dash to the updated dashes state
+                        append("-")
                     }
                 }
             }
-        },
-            enabled = guessedName.isNotEmpty()
-        ) {
-            Text(text = "SUBMIT")
 
+            // Update the dashes state
+            dashesState = updatedDashesState
+
+            // Clear the user input
+            guessedName = ""
+        }) {
+            Text("Submit")
         }
-    }
-
-    // Initialize the country name corresponding to the flag
-    LaunchedEffect(randomIndex) {
-        val countryCode = countryMap.keys.elementAt(randomIndex)
-        countryName = countryMap[countryCode] ?: ""
     }
 }
 
