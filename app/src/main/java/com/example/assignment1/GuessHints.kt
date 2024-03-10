@@ -375,6 +375,10 @@ fun Guessing() {
     // State to hold the dashes representing the country name
     var dashesState by remember { mutableStateOf("") }
 
+    // Initialize a list of booleans to track whether each character has been guessed
+    val guessedChars = remember { mutableStateListOf<Boolean>() }
+
+
 
 
     // Initialize the country name corresponding to the flag
