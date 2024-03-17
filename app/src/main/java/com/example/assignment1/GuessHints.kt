@@ -1,6 +1,7 @@
 package com.example.assignment1
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -23,7 +24,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.modifier.modifierLocalMapOf
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextLayoutInput
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -353,59 +356,35 @@ fun Guessing() {
         "ZW" to "Zimbabwe"
     )
 
-    // State to hold the current generated country code
-    var randomCountryKey by remember { mutableStateOf("") }
 
-    // State variable to hold the index of the randomly selected flag image
+    // State variables
     var randomIndex by remember { mutableStateOf(Random.nextInt(0, flagResourceIds.size)) }
-
-    // State variable to hold the name of the country corresponding to the currently displayed flag
     var countryName by remember { mutableStateOf("") }
-
-    // State variable to hold the name guessed by the user character by character
     var guessedName by remember { mutableStateOf("") }
+    var incorrectAttempts by remember { mutableStateOf(0) }
+    var correctAnswer by remember { mutableStateOf(false) }
 
-    // Get the painter for the randomly selected flag
-    var flagImagePainter = painterResource(id = flagResourceIds[randomIndex])
-
-    // State to hold the user input
-    var userInput by remember { mutableStateOf("") }
-
-
-    // State to hold the dashes representing the country name
-    var dashesState by remember { mutableStateOf("") }
-
-    // Initialize a list of booleans to track whether each character has been guessed
-    val guessedChars = remember { mutableStateListOf<Boolean>() }
-
-
-
-
-    // Initialize the country name corresponding to the flag
     LaunchedEffect(randomIndex) {
         val countryCode = countryMap.keys.elementAt(randomIndex)
         countryName = countryMap[countryCode] ?: ""
-        randomCountryKey = countryCode
     }
 
-    Column (
+    Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
-    ){
-
-
-        // Display flag image
+    ) {
         Image(
-            painter = flagImagePainter,
+            painter = painterResource(id = flagResourceIds[randomIndex]),
             contentDescription = "Random Flag",
             modifier = Modifier.size(180.dp)
         )
-        // Display dashes representing the country name
-        Text(text = countryName.replace(Regex("[A-Za-z]"), "-"),
-            fontSize = 24.sp)
-
-        // Text box for user input
+        Text(
+            text = countryName.replace(Regex("[A-Za-z]"), "-"),
+            fontSize = 24.sp,
+            modifier = Modifier
+                .padding(top = 16.dp)
+        )
         BasicTextField(
             value = guessedName,
             onValueChange = { guessedName = it.take(1) },
@@ -414,41 +393,57 @@ fun Guessing() {
                 .padding(8.dp)
                 .fillMaxWidth()
                 .height(50.dp)
-                .border(1.dp, Color.Gray, RoundedCornerShape(4.dp))
-                .background(Color.White),
+                .border(1.dp, Color.Gray, RoundedCornerShape(5.dp))
+                .background(Color.Yellow),
             textStyle = TextStyle.Default.copy(fontSize = 18.sp)
         )
+        Button(
+            onClick = {
+                val updatedDashesState = buildString {
+                    countryName.forEachIndexed { index, char ->
+                        // Check if the user input matches the character
+                        val guessedChar = guessedName.lowercase().firstOrNull()
+                        if (guessedChar != null && guessedChar == char.lowercaseChar()) {
+                            // Character found in the country name, append it to the updated dashes state
+                            append(char)
+                        } else {
+                            // Character not found in the country name, append the corresponding dash from the current dashes state
+                            append("-")
+                        }
+                    }
+                }
+
+                // Update the dashes state
+                countryName = updatedDashesState
+
+                // Clear the user input after each submission
+                guessedName = ""
 
 
-
-        // submit button
-        Button(onClick = {
-            // Update the dashes based on user input
-            val updatedDashesState = buildString {
-                // Iterate over each character in the country name
-                countryName.forEachIndexed { index, char ->
-                    // Check if the user input matches the character
-                    val guessedChar = guessedName.toLowerCase().getOrNull(index)
-                    if (guessedChar != null && guessedChar == char.lowercaseChar()) {
-                        // Character found in the country name, append it to the updated dashes state
-                        append(char)
-                    } else {
-                        // Character not found in the country name, append a dash to the updated dashes state
-                        append("-")
+                if (updatedDashesState == countryName.toLowerCase()) {
+                    correctAnswer = true
+                } else {
+                    incorrectAttempts++
+                    if (incorrectAttempts >= 3) {
+                        incorrectAttempts = 0
+                        guessedName = ""
+                        randomIndex = Random.nextInt(0, flagResourceIds.size)
                     }
                 }
             }
 
-            // Update the dashes state
-            dashesState = updatedDashesState
 
-            // Clear the user input
-            guessedName = ""
-        }) {
+        ) {
             Text("Submit")
+        }
+
+        if (correctAnswer) {
+            Text("Congratulations!")
         }
     }
 }
+
+
 
 
 

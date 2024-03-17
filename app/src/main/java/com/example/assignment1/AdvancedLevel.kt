@@ -16,31 +16,12 @@ class AdvancedLevel : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Assignment1Theme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting4("Advanced Level")
-                }
-            }
+            AdvancedLvl()
         }
     }
 }
 
 @Composable
-fun Greeting4(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "This is for $name!",
-        modifier = modifier
-    )
-}
+fun AdvancedLvl(){
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview4() {
-    Assignment1Theme {
-        Greeting4("Android")
-    }
 }

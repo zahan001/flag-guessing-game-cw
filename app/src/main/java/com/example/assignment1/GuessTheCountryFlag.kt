@@ -28,6 +28,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.assignment1.ui.theme.Assignment1Theme
+import kotlin.text.split
+
 
 class GuessTheCountryFlag : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -369,7 +371,18 @@ fun GuessFlagName(){
         Spacer(modifier = Modifier.height(16.dp))
 
         val flagsToShow = remember { flagResourceIds.shuffled().take(3) }
-        val correctCountryName = remember { countryMap[correctCountryCode] }
+
+        val correctCountryName = remember {
+            var countryCodeAndName: Pair<String, String>? = null
+            while (countryCodeAndName == null) {
+                val randomCountryCode = countryMap.keys.random()
+                val countryName = countryMap[randomCountryCode]
+                if (countryName != null) {
+                    countryCodeAndName = randomCountryCode to countryName
+                }
+            }
+            countryCodeAndName
+        }
 
         Row {
             flagsToShow.forEachIndexed{ index, flag ->
@@ -398,9 +411,11 @@ fun GuessFlagName(){
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        correctCountryName?.let {
-            Text("Find the flag for: $it") // Generating a name from one of the 3 generated flags
+        correctCountryName?.let { (countryCode, countryName) ->
+            // Access both countryCode and countryName here
+            Text("Find the flag for: $countryName")
         }
+
 
         Spacer(modifier = Modifier.height(16.dp))
 
