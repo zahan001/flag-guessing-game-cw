@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,13 +24,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.assignment1.ui.theme.Assignment1Theme
 import kotlin.random.Random
-
+val customColor1 = Color(0xFF82E0AA) // Custom color 1
+val customColor2 = Color(0xFF283747) // Custom color 2
 class AdvancedLevel : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -372,11 +375,8 @@ fun AdvancedLvl(){
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(
-            modifier = Modifier.size(180.dp),
-            contentAlignment = Alignment.Center
-        ) {
+    )
+    {
             // Display three different flags
             Image(
                 painter = randomImagePainter1,
@@ -384,6 +384,7 @@ fun AdvancedLvl(){
                 modifier = Modifier
                     .size(180.dp)
                     .clip(shape = RoundedCornerShape(5.dp))
+                    .border(2.dp, Color.Gray, shape = RoundedCornerShape(5.dp))
             )
             // Text field for user input under first flag
             TextField(
@@ -398,6 +399,7 @@ fun AdvancedLvl(){
                 modifier = Modifier
                     .size(180.dp)
                     .clip(shape = RoundedCornerShape(5.dp))
+                    .border(2.dp, Color.Gray, shape = RoundedCornerShape(5.dp))
             )
             // Text field for user input under second flag
             TextField(
@@ -412,6 +414,7 @@ fun AdvancedLvl(){
                 modifier = Modifier
                     .size(180.dp)
                     .clip(shape = RoundedCornerShape(5.dp))
+                    .border(2.dp, Color.Gray, shape = RoundedCornerShape(5.dp))
             )
             // Text field for user input under third flag
             TextField(
@@ -419,6 +422,5 @@ fun AdvancedLvl(){
                 onValueChange = { inputText3 = it },
                 modifier = Modifier.padding(top = 8.dp)
             )
-        }
     }
 }

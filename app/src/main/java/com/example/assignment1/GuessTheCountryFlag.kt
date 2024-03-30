@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -363,12 +364,12 @@ val countryMap = mapOf(
 fun GuessFlagName(flagResourceIds: List<Int>,
                   countryMap: Map<String, String>){
 
-    // Define a map that maps each flag resource ID to its country code
+    // Defining a map that maps each flag resource ID to its country code
     val flagCountryCodeMap = flagResourceIds.mapIndexed { index, flagResourceId ->
         flagResourceId to countryMap.keys.toList()[index]
     }.toMap()
 
-    // List to store randomly generated flag resource IDs
+    // Creating a list to store generated flag resource IDs
     val flagsToShow = remember { mutableListOf<Int>() }
 
     // Generate 3 random flags
@@ -379,7 +380,7 @@ fun GuessFlagName(flagResourceIds: List<Int>,
         }
     }
 
-    // Select one of the randomly chosen flags as the correct flag
+    // Selecting one of the randomly chosen flags as the correct flag
     val correctFlagIndex = remember { Random.nextInt(3) }
     val correctFlagResourceId = flagsToShow[correctFlagIndex]
 
@@ -403,7 +404,7 @@ fun GuessFlagName(flagResourceIds: List<Int>,
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Guess the Flag")
+        Text("Guess the Flag") // A text to describe what user should do
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -435,7 +436,7 @@ fun GuessFlagName(flagResourceIds: List<Int>,
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Displaying the name of the target country to the user
+        // Displaying the name of the country which user should guess the flag
         correctCountryName?.let { countryName ->
             Text(text = "Select the flag for: $countryName")
         }
@@ -459,14 +460,14 @@ fun FlagImage(painter: Painter, onClick: () -> Unit) {
         painter = painter,
         contentDescription = null,
         modifier = Modifier
-            .size(140.dp)
+            .size(120.dp)
             .clickable { onClick() }
             .aspectRatio(1f)
             .border(
                 BorderStroke(width = 2.dp, color = Color.LightGray),
-                shape = CircleShape
+                shape = RoundedCornerShape(4.dp)
             )
-            .padding(4.dp),
+            .padding(2.dp),
         contentScale = ContentScale.Fit
     )
 }
