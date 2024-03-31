@@ -394,6 +394,9 @@ fun AdvancedLvl() {
     // State variable to track correctness of user's guesses
     val isCorrectList = remember { mutableStateListOf(false, false, false) }
 
+    // State variable to track whether the form is submitted or not
+    var isSubmitted by remember { mutableStateOf(false) }
+
     // Function to check the user's answers when the submit button is clicked
     fun checkAnswers() {
         for (i in flagsToShow.indices) {
@@ -406,6 +409,7 @@ fun AdvancedLvl() {
                 isCorrectList[i] = false
             }
         }
+        isSubmitted = true // Set the form submission status to true
     }
 
     Column(
@@ -428,7 +432,8 @@ fun AdvancedLvl() {
                 FlagTextField(
                     text = answer,
                     onTextChanged = { newValue -> flagAnswers[flagId] = newValue },
-                    isCorrect = isCorrectList[flagsToShow.indexOf(flagId)]
+                    isCorrect = isCorrectList[flagsToShow.indexOf(flagId)],
+                    isSubmitted = isSubmitted // Pass the isSubmitted parameter
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -469,12 +474,13 @@ fun FlagImage(painter: Painter) {
 fun FlagTextField(
     text: String,
     onTextChanged: (String) -> Unit,
-    isCorrect: Boolean
+    isCorrect: Boolean,
+    isSubmitted: Boolean
 ) {
-    val backgroundColor = if (isCorrect) {
-        Color.Green // Change background color to green if answer is correct
+    val backgroundColor = if (isSubmitted) {
+        if (isCorrect) Color.Green else Color.Red
     } else {
-        Color.Red // Change background color to red if answer is incorrect
+        Color.Transparent // Change background color to red if answer is incorrect
     }
 
     Surface(
@@ -485,7 +491,10 @@ fun FlagTextField(
     ) {
         TextField(
             value = text,
-            onValueChange = { onTextChanged(it) }
+            onValueChange = { onTextChanged(it) },
+            enabled = !isSubmitted, // Disable editing when form is submitted
+            modifier = Modifier.fillMaxWidth()
+
         )
     }
 }
