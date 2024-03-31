@@ -3,21 +3,33 @@ package com.example.assignment1
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -26,13 +38,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.assignment1.ui.theme.Assignment1Theme
 import kotlin.random.Random
-val customColor1 = Color(0xFF82E0AA) // Custom color 1
-val customColor2 = Color(0xFF283747) // Custom color 2
+
 class AdvancedLevel : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,7 +55,7 @@ class AdvancedLevel : ComponentActivity() {
 }
 
 @Composable
-fun AdvancedLvl(){
+fun AdvancedLvl() {
     val flagResourceIds = listOf(
         R.drawable.ad, R.drawable.ae, R.drawable.af, R.drawable.ag, R.drawable.ai,
         R.drawable.al, R.drawable.am, R.drawable.ao, R.drawable.aq, R.drawable.ar,
@@ -356,71 +368,269 @@ fun AdvancedLvl(){
         "ZW" to "Zimbabwe"
     )
 
-    // Generate three random indices
-    var randomIndex1 by remember { mutableStateOf(Random.nextInt(0, flagResourceIds.size)) }
-    var randomIndex2 by remember { mutableStateOf(Random.nextInt(0, flagResourceIds.size)) }
-    var randomIndex3 by remember { mutableStateOf(Random.nextInt(0, flagResourceIds.size)) }
 
-    // Get painters for the randomly selected flags
-    var randomImagePainter1: Painter = painterResource(id = flagResourceIds[randomIndex1])
-    var randomImagePainter2: Painter = painterResource(id = flagResourceIds[randomIndex2])
-    var randomImagePainter3: Painter = painterResource(id = flagResourceIds[randomIndex3])
+    // Defining a map that maps each flag resource ID to its country code
+    val flagCountryCodeMap = flagResourceIds.mapIndexed { index, flagResourceId ->
+        flagResourceId to countryMap.keys.toList()[index]
+    }.toMap()
 
-    // Text fields for user input
-    var inputText1 by remember { mutableStateOf("") }
-    var inputText2 by remember { mutableStateOf("") }
-    var inputText3 by remember { mutableStateOf("") }
+    // Creating a list to store generated flag resource IDs
+    val flagsToShow = remember { mutableListOf<Int>() }
+
+    // Generate 3 random flags
+    while (flagsToShow.size < 3) {
+        val randomFlag = flagResourceIds.random()
+        if (!flagsToShow.contains(randomFlag)) {
+            flagsToShow.add(randomFlag)
+        }
+    }
+
+    /* State variable to track user input for each flag
+    val flagAnswers = remember { mutableStateListOf("", "", "") }*/
+
+    // State variable to track user input for each flag
+    val flagAnswers = remember { mutableStateMapOf<Int, String>() }
+
+    // State variable to track correctness of user's guesses
+    val isCorrectList = remember { mutableStateListOf(false, false, false) }
+
+    // Function to check the user's answers when the submit button is clicked
+    fun checkAnswers() {
+        for (i in flagsToShow.indices) {
+            val countryCode = flagCountryCodeMap[flagsToShow[i]]
+            val correctCountryName = countryMap[countryCode]
+            val enteredName = flagAnswers[flagsToShow[i]]
+            if (correctCountryName.equals(enteredName, ignoreCase = true)) {
+                isCorrectList[i] = true
+            } else {
+                isCorrectList[i] = false
+            }
+        }
+    }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
-    )
-    {
-            // Display three different flags
-            Image(
-                painter = randomImagePainter1,
-                contentDescription = "Random Flag 1",
-                modifier = Modifier
-                    .size(180.dp)
-                    .clip(shape = RoundedCornerShape(5.dp))
-                    .border(2.dp, Color.Gray, shape = RoundedCornerShape(5.dp))
-            )
-            // Text field for user input under first flag
-            TextField(
-                value = inputText1,
-                onValueChange = { inputText1 = it },
-                modifier = Modifier.padding(top = 8.dp)
-            )
+    ) {
 
-            Image(
-                painter = randomImagePainter2,
-                contentDescription = "Random Flag 2",
-                modifier = Modifier
-                    .size(180.dp)
-                    .clip(shape = RoundedCornerShape(5.dp))
-                    .border(2.dp, Color.Gray, shape = RoundedCornerShape(5.dp))
-            )
-            // Text field for user input under second flag
-            TextField(
-                value = inputText2,
-                onValueChange = { inputText2 = it },
-                modifier = Modifier.padding(top = 8.dp)
-            )
+        Spacer(modifier = Modifier.height(16.dp))
 
-            Image(
-                painter = randomImagePainter3,
-                contentDescription = "Random Flag 3",
-                modifier = Modifier
-                    .size(180.dp)
-                    .clip(shape = RoundedCornerShape(5.dp))
-                    .border(2.dp, Color.Gray, shape = RoundedCornerShape(5.dp))
-            )
-            // Text field for user input under third flag
-            TextField(
-                value = inputText3,
-                onValueChange = { inputText3 = it },
-                modifier = Modifier.padding(top = 8.dp)
-            )
+        // Displaying flags and text fields for user input
+        for (flagId in flagsToShow) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                FlagImage(painter = painterResource(id = flagId))
+                Spacer(modifier = Modifier.width(16.dp))
+                val answer = flagAnswers[flagId] ?: ""
+                FlagTextField(
+                    text = answer,
+                    onTextChanged = { newValue -> flagAnswers[flagId] = newValue },
+                    isCorrect = isCorrectList[flagsToShow.indexOf(flagId)]
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Submit button to check answers
+        Button(onClick = {checkAnswers()}) {
+            Text("Submit")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
+
+@Composable
+fun FlagImage(painter: Painter) {
+    Image(
+        painter = painter,
+        contentDescription = null,
+        modifier = Modifier
+            .size(120.dp)
+            .aspectRatio(1f)
+            .border(
+                BorderStroke(width = 2.dp, color = Color.LightGray),
+                shape = RoundedCornerShape(4.dp)
+            )
+            .padding(2.dp),
+        contentScale = ContentScale.Fit
+    )
+}
+
+
+@Composable
+fun FlagTextField(
+    text: String,
+    onTextChanged: (String) -> Unit,
+    isCorrect: Boolean
+) {
+    val backgroundColor = if (isCorrect) {
+        Color.Green // Change background color to green if answer is correct
+    } else {
+        Color.Red // Change background color to red if answer is incorrect
+    }
+
+    Surface(
+        modifier = Modifier
+            .padding(4.dp)
+            .fillMaxWidth(),
+        color = backgroundColor // Apply the background color
+    ) {
+        TextField(
+            value = text,
+            onValueChange = { onTextChanged(it) }
+        )
+    }
+}
+
+
+
+
+
+/* Generate three random indices
+var randomIndex1 by remember { mutableStateOf(Random.nextInt(0, flagResourceIds.size)) }
+var randomIndex2 by remember { mutableStateOf(Random.nextInt(0, flagResourceIds.size)) }
+var randomIndex3 by remember { mutableStateOf(Random.nextInt(0, flagResourceIds.size)) }
+
+// Get painters for the randomly selected flags
+var randomImagePainter1: Painter = painterResource(id = flagResourceIds[randomIndex1])
+var randomImagePainter2: Painter = painterResource(id = flagResourceIds[randomIndex2])
+var randomImagePainter3: Painter = painterResource(id = flagResourceIds[randomIndex3])
+
+// Text fields for user input
+var inputText1 by remember { mutableStateOf("") }
+var inputText2 by remember { mutableStateOf("") }
+var inputText3 by remember { mutableStateOf("") }
+
+// Defined checkAnswer within the composable function for checking the user answers
+fun checkAnswer(inputText: String, correctAnswer: String): Boolean {
+    return inputText.equals(correctAnswer, ignoreCase = true)
+}
+
+Column(
+    modifier = Modifier.fillMaxSize(),
+    verticalArrangement = Arrangement.Center,
+    horizontalAlignment = Alignment.CenterHorizontally
+)
+{
+    // Display three different flags
+    Image(
+        painter = randomImagePainter1,
+        contentDescription = "Random Flag 1",
+        modifier = Modifier
+            .size(180.dp)
+            .clip(shape = RoundedCornerShape(5.dp))
+            .border(2.dp, Color.Gray, shape = RoundedCornerShape(5.dp))
+    )
+    // Text field for user input under first flag
+    TextField(
+        value = inputText1,
+        onValueChange = { inputText1 = it },
+        modifier = Modifier.padding(top = 8.dp)
+            .background( // Logic for updating the color of the text fields
+                if (checkAnswer(inputText1, countryMap[randomImagePainter1.toString()] ?: "")) Color.Green
+            else Color.Red)
+    )
+
+    Image(
+        painter = randomImagePainter2,
+        contentDescription = "Random Flag 2",
+        modifier = Modifier
+            .size(180.dp)
+            .clip(shape = RoundedCornerShape(5.dp))
+            .border(2.dp, Color.Gray, shape = RoundedCornerShape(5.dp))
+    )
+    // Text field for user input under second flag
+    TextField(
+        value = inputText2,
+        onValueChange = { inputText2 = it },
+        modifier = Modifier.padding(top = 8.dp)
+            .background( // Logic for updating the color of the text fields
+                if (checkAnswer(inputText2, countryMap[randomImagePainter2.toString()] ?: "")) Color.Green
+                else Color.Red)
+    )
+
+    Image(
+        painter = randomImagePainter3,
+        contentDescription = "Random Flag 3",
+        modifier = Modifier
+            .size(180.dp)
+            .clip(shape = RoundedCornerShape(5.dp))
+            .border(2.dp, Color.Gray, shape = RoundedCornerShape(5.dp))
+    )
+    // Text field for user input under third flag
+    TextField(
+        value = inputText3,
+        onValueChange = { inputText3 = it },
+        modifier = Modifier.padding(top = 8.dp)
+            .background( // Logic for updating the color of the text fields
+                if (checkAnswer(inputText3, countryMap[randomImagePainter3.toString()] ?: "")) Color.Green
+                else Color.Red)
+    )
+    Button(onClick = {
+
+        val correctAnswer1 = countryMap[flagResourceIds[randomIndex1].toString()] ?: ""
+        val correctAnswer2 = countryMap[flagResourceIds[randomIndex2].toString()] ?: ""
+        val correctAnswer3 = countryMap[flagResourceIds[randomIndex3].toString()] ?: ""
+
+        val isAnswer1Correct = checkAnswer(inputText1, correctAnswer1)
+        val isAnswer2Correct = checkAnswer(inputText2, correctAnswer2)
+        val isAnswer3Correct = checkAnswer(inputText3, correctAnswer3)
+
+        if (isAnswer1Correct) {
+            inputText1 = correctAnswer1
+        }
+
+        if (isAnswer2Correct) {
+            inputText2 = correctAnswer2
+        }
+
+        if (isAnswer3Correct) {
+            inputText3 = correctAnswer3
+        }
+
+
+    }) {
+        Text(text = "Submit")
+
+    }
+}
+}*/
+
+
+/* Function to check user answers
+fun checkAnswers() {
+    val correctAnswer1 = countryMap[randomImagePainter1.toString()] ?: ""
+    val correctAnswer2 = countryMap[randomImagePainter2.toString()] ?: ""
+    val correctAnswer3 = countryMap[randomImagePainter3.toString()] ?: ""
+
+    // Check first answer
+    if (inputText1.equals(correctAnswer1, ignoreCase = true)) {
+        inputText1 = correctAnswer1
+    } else {
+        inputText1 = inputText1 // Keep the user's input as it is
+    }
+
+    // Check second answer
+    if (inputText2.equals(correctAnswer2, ignoreCase = true)) {
+        inputText2 = correctAnswer2
+    } else {
+        inputText2 = inputText2 // Keep the user's input as it is
+    }
+
+    // Check third answer
+    if (inputText3.equals(correctAnswer3, ignoreCase = true)) {
+        inputText3 = correctAnswer3
+    } else {
+        inputText3 = inputText3 // Keep the user's input as it is
+    }
+}
+*/
+

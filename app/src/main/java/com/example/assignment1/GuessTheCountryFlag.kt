@@ -1,5 +1,6 @@
 package com.example.assignment1
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -43,8 +44,13 @@ class GuessTheCountryFlag : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            GuessFlagName(flagResourceIds, countryMap)
+            GuessFlagName(flagResourceIds, countryMap) { startNewActivity() }
         }
+    }
+    private fun startNewActivity() {
+        val intent = Intent(this, GuessTheCountryFlag::class.java)
+        startActivity(intent)
+        finish() // Finish the current activity and start a fresh one
     }
 }
 
@@ -362,7 +368,9 @@ val countryMap = mapOf(
 
 @Composable
 fun GuessFlagName(flagResourceIds: List<Int>,
-                  countryMap: Map<String, String>){
+                  countryMap: Map<String, String>,
+                  onNextButtonClick: ()-> Unit // Callback function for starting a new activity
+){
 
     // Defining a map that maps each flag resource ID to its country code
     val flagCountryCodeMap = flagResourceIds.mapIndexed { index, flagResourceId ->
@@ -448,6 +456,7 @@ fun GuessFlagName(flagResourceIds: List<Int>,
             // Reset states for the next round
             setUserAttempted(false)
             setIsCorrect(false)
+            onNextButtonClick() // Call the callback function to start a new activity
         }) {
             Text("Next")
         }
@@ -472,7 +481,8 @@ fun FlagImage(painter: Painter, onClick: () -> Unit) {
     )
 }
 
-
+/* References
+* */
 
 
 
