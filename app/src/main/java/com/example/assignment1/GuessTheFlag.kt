@@ -49,6 +49,7 @@ import kotlin.random.Random
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import kotlinx.coroutines.selects.select
@@ -400,6 +401,10 @@ fun RandomFlag(){
     // Get the painter for the randomly selected flag
     var randomImagePainter: Painter = painterResource(id = flagResourceIds[randomIndex])
 
+    /*val orientation = LocalConfiguration.current.orientation
+
+    if (orientation == 1)*/
+
     Column (
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -505,4 +510,5 @@ fun RandomFlag(){
         }
     }
 }
+
 

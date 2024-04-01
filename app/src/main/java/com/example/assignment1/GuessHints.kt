@@ -20,6 +20,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
@@ -358,20 +359,24 @@ fun Guessing() {
         "ZW" to "Zimbabwe"
     )
 
-    // State variables
-    var randomIndex by remember { mutableStateOf(Random.nextInt(0, flagResourceIds.size)) }
+    // // State variable for storing the index of the randomly selected flag
+    var randomIndex by rememberSaveable { mutableStateOf(Random.nextInt(0, flagResourceIds.size)) }
 
-    var countryName by remember { mutableStateOf("") }
+    // State variable for storing the name of the country corresponding to the selected flag
+    var countryName by rememberSaveable { mutableStateOf("") }
 
-    var guessedName by remember { mutableStateOf("") }
+    // State variable for storing the user's guessed character
+    var guessedName by rememberSaveable { mutableStateOf("") }
 
-    var incorrectAttempts by remember { mutableStateOf(0) }
+    // State variable for tracking the number of incorrect attempts by the user
+    var incorrectAttempts by rememberSaveable { mutableStateOf(0) }
 
-    var correctAnswer by remember { mutableStateOf(false) }
+    // State variable for tracking whether the user has guessed the correct answer
+    var correctAnswer by rememberSaveable { mutableStateOf(false) }
 
 
     // Initialize the dashes state based on the length of the country name
-    var dashesState by remember {
+    var dashesState by rememberSaveable {
         mutableStateOf(
             buildString {
                 countryName.forEach {
@@ -387,6 +392,7 @@ fun Guessing() {
 
     // Effect to execute when the randomIndex changes
     LaunchedEffect(randomIndex) {
+        // Set the country name and reset the dashes state when a new country is selected
         val countryCode = countryMap.keys.elementAt(randomIndex)
         countryName = countryMap[countryCode] ?: ""
         // Reset the dashes state when a new country is selected
@@ -497,6 +503,7 @@ fun Guessing() {
                 }
             }
         ) {
+            // Change button text based on game state
             Text(if (correctAnswer || incorrectAttempts >= 3) "Next" else "Submit")
         }
 

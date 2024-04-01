@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -378,7 +379,7 @@ fun GuessFlagName(flagResourceIds: List<Int>,
     }.toMap()
 
     // Creating a list to store generated flag resource IDs
-    val flagsToShow = remember { mutableListOf<Int>() }
+    val flagsToShow = rememberSaveable { mutableListOf<Int>() }
 
     // Generate 3 random flags
     while (flagsToShow.size < 3) {
@@ -389,7 +390,7 @@ fun GuessFlagName(flagResourceIds: List<Int>,
     }
 
     // Selecting one of the randomly chosen flags as the correct flag
-    val correctFlagIndex = remember { Random.nextInt(3) }
+    val correctFlagIndex = rememberSaveable { Random.nextInt(3) }
     val correctFlagResourceId = flagsToShow[correctFlagIndex]
 
     // Extracting the corresponding country code for the correct flag
@@ -403,8 +404,8 @@ fun GuessFlagName(flagResourceIds: List<Int>,
     val correctCountryName = remember { countryMap[correctCountryCode] }
 
     // State variables to track user interaction and correctness of guess
-    val (userAttempted, setUserAttempted) = remember { mutableStateOf(false) }
-    val (isCorrect, setIsCorrect) = remember { mutableStateOf(false) }
+    val (userAttempted, setUserAttempted) = rememberSaveable { mutableStateOf(false) }
+    val (isCorrect, setIsCorrect) = rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -480,9 +481,6 @@ fun FlagImage(painter: Painter, onClick: () -> Unit) {
         contentScale = ContentScale.Fit
     )
 }
-
-/* References
-* */
 
 
 

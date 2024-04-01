@@ -31,6 +31,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            // Column composable element
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
@@ -38,32 +39,32 @@ class MainActivity : ComponentActivity() {
             ) {
                 
                 Button(onClick = {
-                    val option1 = Intent(this@MainActivity, GuessTheFlag::class.java)
-                    startActivity(option1)
+                    val option1 = Intent(this@MainActivity, GuessTheFlag::class.java) // Create an Intent to start the GuessTheFlag activity
+                    startActivity(option1) // Start Guess The Flag activity
                 }) {
                     Text(text = "Guess The Country", fontSize = 18.sp)
 
                 }
 
                 Button(onClick = {
-                    val option2 = Intent(this@MainActivity, GuessHints::class.java)
-                    startActivity(option2)
+                    val option2 = Intent(this@MainActivity, GuessHints::class.java) // Create an Intent to start the GuessHints activity
+                    startActivity(option2) // Start Guess Hints activity
                 }) {
                     Text(text = "Guess Hints", fontSize = 18.sp)
 
                 }
 
                 Button(onClick = {
-                    val option3 = Intent(this@MainActivity, GuessTheCountryFlag::class.java)
-                    startActivity(option3)
+                    val option3 = Intent(this@MainActivity, GuessTheCountryFlag::class.java) // Create an Intent to start the GuessTheCountryFlag activity
+                    startActivity(option3) // Start Guess Country Flag activity
                 }) {
                     Text(text = "Guess The Flag", fontSize = 18.sp)
 
                 }
 
                 Button(onClick = {
-                    val option4 = Intent(this@MainActivity, AdvancedLevel::class.java)
-                    startActivity(option4)
+                    val option4 = Intent(this@MainActivity, AdvancedLevel::class.java) // Create an Intent to start the AdvancedLevel activity
+                    startActivity(option4) // Start Advanced Level activity
                 }) {
                     Text(text = "Advanced Level", fontSize = 18.sp)
 

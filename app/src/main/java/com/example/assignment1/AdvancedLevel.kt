@@ -32,6 +32,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -390,18 +391,18 @@ fun AdvancedLvl() {
     val flagAnswers = remember { mutableStateListOf("", "", "") }*/
 
     // State variable to track user input for each flag
-    val flagAnswers = remember { mutableStateMapOf<Int, String>() }
+    val flagAnswers = rememberSaveable { mutableStateMapOf<Int, String>() }
 
     // State variable to track correctness of user's guesses
-    val isCorrectList = remember { mutableStateListOf(false, false, false) }
+    val isCorrectList = rememberSaveable { mutableStateListOf(false, false, false) }
 
     // State variable to track whether the form is submitted or not
-    var isSubmitted by remember { mutableStateOf(false) }
+    var isSubmitted by rememberSaveable { mutableStateOf(false) }
 
-    var incorrectAttempts by remember { mutableStateOf(0) }
+    var incorrectAttempts by rememberSaveable { mutableStateOf(0) }
 
     // State variable to track the number of correct guesses
-    var correctGuesses by remember { mutableStateOf(0) }
+    var correctGuesses by rememberSaveable { mutableStateOf(0) }
 
     /* Implementing a new Function to generate random flags
     fun generateRandomFlags(flagResourceIds: List<Int>, count: Int): List<Int> {
@@ -537,8 +538,8 @@ fun FlagImage(painter: Painter) {
 fun FlagTextField(
     text: String,
     onTextChanged: (String) -> Unit,
-    isCorrect: Boolean,
-    isSubmitted: Boolean,
+    isCorrect: Boolean, // parameter to indicate whether the answer is true
+    isSubmitted: Boolean, // parameter to indicate whether the submit button is clicked
     isEnabled: Boolean // parameter to indicate whether the field should be enabled
 ) {
     val textColor = when {
