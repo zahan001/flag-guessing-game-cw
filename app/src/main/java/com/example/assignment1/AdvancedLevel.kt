@@ -467,11 +467,13 @@ fun AdvancedLvl() {
                 FlagImage(painter = painterResource(id = flagId))
                 Spacer(modifier = Modifier.width(16.dp))
                 val answer = flagAnswers[flagId] ?: ""
+                val isCurrentCorrect = isCorrectList[flagsToShow.indexOf(flagId)]
                 FlagTextField(
                     text = answer,
                     onTextChanged = { newValue -> flagAnswers[flagId] = newValue },
-                    isCorrect = isCorrectList[flagsToShow.indexOf(flagId)],
-                    isSubmitted = isSubmitted // Pass the isSubmitted parameter
+                    isCorrect = isCurrentCorrect,
+                    isSubmitted = isSubmitted, // Pass the isSubmitted parameter
+                    isEnabled = !isSubmitted || !isCurrentCorrect // Enable field if not submitted or if answer is incorrect
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -487,7 +489,7 @@ fun AdvancedLvl() {
             }
         } else {
             // Display "WRONG!" message after 3 incorrect attempts
-            if (incorrectAttempts >= 3) {
+            if (incorrectAttempts == 3) {
                 Text("WRONG!", color = Color.Red)
                 // Display correct country names in blue color below incorrect answers
                 for ((index, flagId) in flagsToShow.withIndex()) {
@@ -536,9 +538,14 @@ fun FlagTextField(
     text: String,
     onTextChanged: (String) -> Unit,
     isCorrect: Boolean,
-    isSubmitted: Boolean
+    isSubmitted: Boolean,
+    isEnabled: Boolean // parameter to indicate whether the field should be enabled
 ) {
-    val textColor = if (!isCorrect && isSubmitted) Color.Red else Color.Black
+    val textColor = when {
+        isCorrect -> Color.Green // Set text color to green for correct answers
+        !isCorrect && isSubmitted -> Color.Red // Set text color to red for incorrect answers
+        else -> Color.Black
+    }
 
     val backgroundColor = if (isSubmitted) {
         if (isCorrect) Color.Green else Color.Red
@@ -548,15 +555,16 @@ fun FlagTextField(
 
     Surface(
         modifier = Modifier
-            .padding(4.dp)
+            .padding(10.dp)
             .fillMaxWidth(),
         color = backgroundColor // Apply the background color
     ) {
         TextField(
             value = text,
             onValueChange = { onTextChanged(it) },
-            enabled = !isSubmitted, // Disable editing when form is submitted
-            modifier = Modifier.fillMaxWidth(),
+            enabled = isEnabled,
+            modifier = Modifier
+                .fillMaxWidth(),
             textStyle = TextStyle(color = textColor) // Set text color to red for incorrect guesses
 
         )

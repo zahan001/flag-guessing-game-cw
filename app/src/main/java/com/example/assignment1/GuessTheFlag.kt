@@ -47,14 +47,17 @@ import androidx.compose.ui.unit.dp
 import java.util.*
 import kotlin.random.Random
 import androidx.compose.foundation.lazy.items
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import kotlinx.coroutines.selects.select
 
 class GuessTheFlag : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            RandomFlag()
+            RandomFlag() // Display the RandomFlag composable
         }
     }
 }
@@ -62,6 +65,7 @@ class GuessTheFlag : ComponentActivity() {
 @Composable
 fun RandomFlag(){
 
+    // List of flag resource IDs
     val flagResourceIds = listOf(
         R.drawable.ad, R.drawable.ae, R.drawable.af, R.drawable.ag, R.drawable.ai,
         R.drawable.al, R.drawable.am, R.drawable.ao, R.drawable.aq, R.drawable.ar,
@@ -117,6 +121,7 @@ fun RandomFlag(){
         R.drawable.zm, R.drawable.zw
     )
 
+    // Map of country codes and Names
     val countryMap = mapOf(
         "AD" to "Andorra",
         "AE" to "United Arab Emirates",
@@ -377,18 +382,20 @@ fun RandomFlag(){
 
 
     // State to hold the current generated country code
-    var randomCountryKey by remember {mutableStateOf("")}
+    var randomCountryKey by rememberSaveable {mutableStateOf("")} // Using rememberSaveable function to retain and manage state across configuration changes such as screen rotation
 
     // Generating a random index
 
-    var randomIndex by remember {mutableStateOf(Random.nextInt(0,flagResourceIds.size))}
+    var randomIndex by rememberSaveable {mutableStateOf(Random.nextInt(0,flagResourceIds.size))}
 
-    var selectedCountry by remember { mutableStateOf("") }
+    // State to track the selected country
+    var selectedCountry by rememberSaveable { mutableStateOf("") }
 
-    var isCorrect by remember { mutableStateOf(false) }
+    // State to track if the selected country is correct
+    var isCorrect by rememberSaveable { mutableStateOf(false) }
 
     // State to to track the status of the submit button
-    var submitted by remember { mutableStateOf(false) }
+    var submitted by rememberSaveable { mutableStateOf(false) }
 
     // Get the painter for the randomly selected flag
     var randomImagePainter: Painter = painterResource(id = flagResourceIds[randomIndex])
@@ -400,11 +407,12 @@ fun RandomFlag(){
     ){
         Text(text = "GUESS THE COUNTRY NAME!")
 
+        // Container to display the randomly selected flag
         Box(
             modifier = Modifier.size(180.dp),
             contentAlignment = Alignment.Center
             ){
-            Image( // Display the flags
+            Image( // Display the flag
                 painter = randomImagePainter,
                 contentDescription = "Random Flag",
                 modifier = Modifier
@@ -413,6 +421,7 @@ fun RandomFlag(){
             )
         }
 
+        // Display the list of country names
         LazyColumn(
             modifier = Modifier
                 .height(400.dp)
@@ -426,7 +435,7 @@ fun RandomFlag(){
                     modifier = Modifier
                         .padding(vertical = 4.dp)
                         .clickable {
-                            if (!submitted){
+                            if (!submitted) { // Select the country if not submitted
                                 selectedCountry = countryName
                             }
                         }
@@ -436,6 +445,7 @@ fun RandomFlag(){
 
 
 
+        // Button to reset the game and go to the next flag
         Button(onClick = {
             randomIndex = Random.nextInt(0, flagResourceIds.size)
             randomCountryKey = countryMap.keys.toList()[randomIndex]
@@ -449,6 +459,7 @@ fun RandomFlag(){
 
         }
 
+        // Button to submit the selected country
         if (selectedCountry.isNotEmpty() && !submitted) {
             Button(
                 onClick = {
@@ -461,13 +472,36 @@ fun RandomFlag(){
             }
         }
 
+        // Display the result based on the user input
         if (submitted){
+            val message = if (isCorrect) "CORRECT!" else "WRONG! Correct Country: ${countryMap[randomCountryKey]}" // Display Correct or Wrong messages accordingly
+            // Define the color of the message based on correctness
+            val color = if (isCorrect) Color.Green else Color.Red
+            val correctCountryMessage = "Correct Country: ${countryMap[randomCountryKey]}"
+            // Build an AnnotatedString to allow for styled text
             Text(
-                text = if(isCorrect) "Correct!" else "Incorrect!",
+                text = AnnotatedString.Builder(message)
+                    .apply {
+                        // If the guess is incorrect, style the correct country message to highlight it
+                        if (!isCorrect) {
+                            addStyle(
+                                style = SpanStyle(color = Color.Blue),
+                                // Specify the range of the correct country message within the full message
+                                start = message.indexOf(correctCountryMessage),
+                                end = message.indexOf(correctCountryMessage) + correctCountryMessage.length
+                            )
+                        }
+                    }
+                    .toAnnotatedString(),
+                color = color,
+                modifier = Modifier.padding(top = 16.dp)
+            )
+            /*Text(
+                text = if(isCorrect) "CORRECT!" else "WRONG! Correct Country: ${countryMap[randomCountryKey]}",
                 color = if(isCorrect) Color.Green else Color.Red,
                 modifier = Modifier.padding(top = 16.dp)
 
-            )
+            )*/
         }
     }
 }

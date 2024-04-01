@@ -369,6 +369,7 @@ fun Guessing() {
 
     var correctAnswer by remember { mutableStateOf(false) }
 
+
     // Initialize the dashes state based on the length of the country name
     var dashesState by remember {
         mutableStateOf(
@@ -384,6 +385,7 @@ fun Guessing() {
         )
     }
 
+    // Effect to execute when the randomIndex changes
     LaunchedEffect(randomIndex) {
         val countryCode = countryMap.keys.elementAt(randomIndex)
         countryName = countryMap[countryCode] ?: ""
@@ -399,21 +401,24 @@ fun Guessing() {
         }
     }
 
-    Column(
+    Column(  // Column composable to display UI elements vertically
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Image composable to display the generated flag
         Image(
             painter = painterResource(id = flagResourceIds[randomIndex]),
             contentDescription = "Random Flag",
             modifier = Modifier.size(180.dp)
         )
+        // Text composable to display the dashes representing the country name
         Text(
             text = dashesState,
             fontSize = 24.sp,
             modifier = Modifier.padding(top = 16.dp)
         )
+        // BasicTextField composable to input the guessed character
         BasicTextField(
             value = guessedName,
             onValueChange = { newText ->
@@ -432,8 +437,9 @@ fun Guessing() {
             textStyle = TextStyle.Default.copy(fontSize = 18.sp),
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text)
         )
+        // Button composable to submit the guessed character
         Button(
-            onClick = {
+            onClick = {  // Logic to handle the submission of the guessed character
                 val updatedDashesState = buildString {
                     countryName.forEachIndexed { index, char ->
                         // Check if the user input matches the character (case insensitive)
@@ -476,6 +482,7 @@ fun Guessing() {
                     // Check if all characters have been guessed correctly
                     if (updatedDashesState == actualCountry) {
                         correctAnswer = true
+
                     }
 
                 } else {
@@ -490,11 +497,19 @@ fun Guessing() {
                 }
             }
         ) {
-            Text("Submit")
+            Text(if (correctAnswer || incorrectAttempts >= 3) "Next" else "Submit")
         }
 
         // Display messages based on the number of incorrect attempts and whether the answer is correct
-        if (incorrectAttempts >= 3) {
+        if (correctAnswer && dashesState == countryName.lowercase()) {
+            // Show "CORRECT!" message only if all characters are correctly guessed
+            Text(
+                text = "CORRECT!",
+                color = Color.Green,
+                fontSize = 18.sp,
+                modifier = Modifier.padding(top = 16.dp)
+            )
+        } else if (incorrectAttempts >= 3) {
             // Reset the game if the user exceeds the maximum number of incorrect attempts
             incorrectAttempts = 0
             guessedName = ""
@@ -506,17 +521,13 @@ fun Guessing() {
                 fontSize = 18.sp,
                 modifier = Modifier.padding(top = 16.dp)
             )
-        } else if (correctAnswer) {
-            // Show "CORRECT!" message only if all characters are correctly guessed
-            Text(
-                text = "CORRECT!",
-                color = Color.Green,
-                fontSize = 18.sp,
-                modifier = Modifier.padding(top = 16.dp)
-            )
         }
     }
 }
+
+
+
+
 
 
 
