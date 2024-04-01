@@ -16,6 +16,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -26,6 +27,7 @@ import androidx.compose.ui.modifier.modifierLocalMapOf
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextLayoutInput
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
@@ -356,17 +358,45 @@ fun Guessing() {
         "ZW" to "Zimbabwe"
     )
 
-
     // State variables
     var randomIndex by remember { mutableStateOf(Random.nextInt(0, flagResourceIds.size)) }
+
     var countryName by remember { mutableStateOf("") }
+
     var guessedName by remember { mutableStateOf("") }
+
     var incorrectAttempts by remember { mutableStateOf(0) }
+
     var correctAnswer by remember { mutableStateOf(false) }
+
+    // Initialize the dashes state based on the length of the country name
+    var dashesState by remember {
+        mutableStateOf(
+            buildString {
+                countryName.forEach {
+                    if (it.isLetter()) {
+                        append("-")
+                    } else {
+                        append(it)
+                    }
+                }
+            }
+        )
+    }
 
     LaunchedEffect(randomIndex) {
         val countryCode = countryMap.keys.elementAt(randomIndex)
         countryName = countryMap[countryCode] ?: ""
+        // Reset the dashes state when a new country is selected
+        dashesState = buildString {
+            countryName.forEach {
+                if (it.isLetter()) {
+                    append("-")
+                } else {
+                    append(it)
+                }
+            }
+        }
     }
 
     Column(
@@ -380,65 +410,110 @@ fun Guessing() {
             modifier = Modifier.size(180.dp)
         )
         Text(
-            text = countryName.replace(Regex("[A-Za-z]"), "-"),
+            text = dashesState,
             fontSize = 24.sp,
-            modifier = Modifier
-                .padding(top = 16.dp)
+            modifier = Modifier.padding(top = 16.dp)
         )
         BasicTextField(
             value = guessedName,
-            onValueChange = { guessedName = it.take(1) },
+            onValueChange = { newText ->
+                // Update the input only if a single character is entered
+                if (newText.length <= 1) {
+                    guessedName = newText
+                }
+            },
             singleLine = true,
             modifier = Modifier
                 .padding(8.dp)
-                .fillMaxWidth()
+                .width(100.dp)
                 .height(50.dp)
                 .border(1.dp, Color.Gray, RoundedCornerShape(5.dp))
-                .background(Color.Yellow),
-            textStyle = TextStyle.Default.copy(fontSize = 18.sp)
+                .background(Color.LightGray),
+            textStyle = TextStyle.Default.copy(fontSize = 18.sp),
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text)
         )
         Button(
             onClick = {
                 val updatedDashesState = buildString {
                     countryName.forEachIndexed { index, char ->
-                        // Check if the user input matches the character
+                        // Check if the user input matches the character (case insensitive)
                         val guessedChar = guessedName.lowercase().firstOrNull()
                         if (guessedChar != null && guessedChar == char.lowercaseChar()) {
                             // Character found in the country name, append it to the updated dashes state
                             append(char)
+                        } else if (char != '-') {
+                            // Append the character from the country name if it's not a dash
+                            append(char)
                         } else {
-                            // Character not found in the country name, append the corresponding dash from the current dashes state
+                            // Append a dash for characters that were previously guessed but not yet revealed
                             append("-")
                         }
                     }
                 }
 
-                // Update the dashes state
-                countryName = updatedDashesState
+                // Check if the user's input was correct
+                val guessedChar = guessedName.lowercase().firstOrNull()
+                val actualCountry = countryMap.values.elementAt(randomIndex).lowercase()
 
-                // Clear the user input after each submission
-                guessedName = ""
+                if (guessedChar != null && actualCountry.contains(guessedChar)) {
+                    val updatedDashesState = buildString {
+                        // Iterate through the characters of the country name
+                        countryName.forEachIndexed { index, char ->
+                            if (char.lowercaseChar() == guessedChar || dashesState[index] != '-') {
+                                // Replace the dash with the guessed character if it matches or if it has already been revealed
+                                append(char)
+                            } else {
+                                // Keep the dash if it's not yet revealed
+                                append("-")
+                            }
+                        }
+                    }
+                    dashesState = updatedDashesState
 
+                    // Clear the user input after each correct submission
+                    guessedName = ""
 
-                if (updatedDashesState == countryName.toLowerCase()) {
-                    correctAnswer = true
+                    // Check if all characters have been guessed correctly
+                    if (updatedDashesState == actualCountry) {
+                        correctAnswer = true
+                    }
+
                 } else {
+                    // User guessed incorrectly
                     incorrectAttempts++
                     if (incorrectAttempts >= 3) {
+                        // Reset the game if the user exceeds the maximum number of incorrect attempts
                         incorrectAttempts = 0
                         guessedName = ""
                         randomIndex = Random.nextInt(0, flagResourceIds.size)
                     }
                 }
             }
-
-
         ) {
             Text("Submit")
         }
 
-        if (correctAnswer) {
-            Text("Congratulations!")
+        // Display messages based on the number of incorrect attempts and whether the answer is correct
+        if (incorrectAttempts >= 3) {
+            // Reset the game if the user exceeds the maximum number of incorrect attempts
+            incorrectAttempts = 0
+            guessedName = ""
+            randomIndex = Random.nextInt(0, flagResourceIds.size)
+            correctAnswer = false // Reset the correct answer flag
+            Text(
+                text = "WRONG!",
+                color = Color.Red,
+                fontSize = 18.sp,
+                modifier = Modifier.padding(top = 16.dp)
+            )
+        } else if (correctAnswer) {
+            // Show "CORRECT!" message only if all characters are correctly guessed
+            Text(
+                text = "CORRECT!",
+                color = Color.Green,
+                fontSize = 18.sp,
+                modifier = Modifier.padding(top = 16.dp)
+            )
         }
     }
 }

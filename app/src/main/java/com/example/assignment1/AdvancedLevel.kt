@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.assignment1.ui.theme.Assignment1Theme
@@ -397,6 +398,23 @@ fun AdvancedLvl() {
     // State variable to track whether the form is submitted or not
     var isSubmitted by remember { mutableStateOf(false) }
 
+    var incorrectAttempts by remember { mutableStateOf(0) }
+
+    // State variable to track the number of correct guesses
+    var correctGuesses by remember { mutableStateOf(0) }
+
+    /* Implementing a new Function to generate random flags
+    fun generateRandomFlags(flagResourceIds: List<Int>, count: Int): List<Int> {
+        val flags = mutableListOf<Int>()
+        while (flags.size < count) {
+            val randomFlag = flagResourceIds.random()
+            if (!flags.contains(randomFlag)) {
+                flags.add(randomFlag)
+            }
+        }
+        return flags
+    }*/
+
     // Function to check the user's answers when the submit button is clicked
     fun checkAnswers() {
         for (i in flagsToShow.indices) {
@@ -405,11 +423,31 @@ fun AdvancedLvl() {
             val enteredName = flagAnswers[flagsToShow[i]]
             if (correctCountryName.equals(enteredName, ignoreCase = true)) {
                 isCorrectList[i] = true
+                correctGuesses++
             } else {
                 isCorrectList[i] = false
+                incorrectAttempts++
             }
         }
         isSubmitted = true // Set the form submission status to true
+
+    }
+
+    // Function to reset the game for the next round
+    fun resetGame() {
+        isSubmitted = false
+        incorrectAttempts = 0
+        correctGuesses = 0
+        flagsToShow.clear()
+        // Generate 3 new random flags
+        while (flagsToShow.size < 3) {
+            val randomFlag = flagResourceIds.random()
+            if (!flagsToShow.contains(randomFlag)) {
+                flagsToShow.add(randomFlag)
+            }
+        }
+        flagAnswers.clear()
+        isCorrectList.fill(false)
     }
 
     Column(
@@ -439,18 +477,41 @@ fun AdvancedLvl() {
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-
-
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Submit button to check answers
-        Button(onClick = {checkAnswers()}) {
-            Text("Submit")
+        // Display "CORRECT!" message and change button label to "Next" if all answers are correct
+        if (isCorrectList.all { it }) {
+            Text("CORRECT!", color = Color.Green)
+            Button(onClick = { resetGame() }) {
+                Text("Next")
+            }
+        } else {
+            // Display "WRONG!" message after 3 incorrect attempts
+            if (incorrectAttempts >= 3) {
+                Text("WRONG!", color = Color.Red)
+                // Display correct country names in blue color below incorrect answers
+                for ((index, flagId) in flagsToShow.withIndex()) {
+                    if (!isCorrectList[index]) {
+                        val countryCode = flagCountryCodeMap[flagId]
+                        val correctCountryName = countryMap[countryCode]
+                        Text(correctCountryName ?: "", color = Color.Blue)
+                    }
+                }
+                Button(onClick = { resetGame() }) {
+                    Text("Next")
+                }
+            } else {
+                // Submit button to check answers
+                Button(onClick = { checkAnswers() }) {
+                    Text("Submit")
+                }
+            }
         }
-
+            Spacer(modifier = Modifier.height(16.dp))
+        }
         Spacer(modifier = Modifier.height(16.dp))
+
     }
-}
 
 @Composable
 fun FlagImage(painter: Painter) {
@@ -477,6 +538,8 @@ fun FlagTextField(
     isCorrect: Boolean,
     isSubmitted: Boolean
 ) {
+    val textColor = if (!isCorrect && isSubmitted) Color.Red else Color.Black
+
     val backgroundColor = if (isSubmitted) {
         if (isCorrect) Color.Green else Color.Red
     } else {
@@ -493,7 +556,8 @@ fun FlagTextField(
             value = text,
             onValueChange = { onTextChanged(it) },
             enabled = !isSubmitted, // Disable editing when form is submitted
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            textStyle = TextStyle(color = textColor) // Set text color to red for incorrect guesses
 
         )
     }
@@ -502,144 +566,4 @@ fun FlagTextField(
 
 
 
-
-/* Generate three random indices
-var randomIndex1 by remember { mutableStateOf(Random.nextInt(0, flagResourceIds.size)) }
-var randomIndex2 by remember { mutableStateOf(Random.nextInt(0, flagResourceIds.size)) }
-var randomIndex3 by remember { mutableStateOf(Random.nextInt(0, flagResourceIds.size)) }
-
-// Get painters for the randomly selected flags
-var randomImagePainter1: Painter = painterResource(id = flagResourceIds[randomIndex1])
-var randomImagePainter2: Painter = painterResource(id = flagResourceIds[randomIndex2])
-var randomImagePainter3: Painter = painterResource(id = flagResourceIds[randomIndex3])
-
-// Text fields for user input
-var inputText1 by remember { mutableStateOf("") }
-var inputText2 by remember { mutableStateOf("") }
-var inputText3 by remember { mutableStateOf("") }
-
-// Defined checkAnswer within the composable function for checking the user answers
-fun checkAnswer(inputText: String, correctAnswer: String): Boolean {
-    return inputText.equals(correctAnswer, ignoreCase = true)
-}
-
-Column(
-    modifier = Modifier.fillMaxSize(),
-    verticalArrangement = Arrangement.Center,
-    horizontalAlignment = Alignment.CenterHorizontally
-)
-{
-    // Display three different flags
-    Image(
-        painter = randomImagePainter1,
-        contentDescription = "Random Flag 1",
-        modifier = Modifier
-            .size(180.dp)
-            .clip(shape = RoundedCornerShape(5.dp))
-            .border(2.dp, Color.Gray, shape = RoundedCornerShape(5.dp))
-    )
-    // Text field for user input under first flag
-    TextField(
-        value = inputText1,
-        onValueChange = { inputText1 = it },
-        modifier = Modifier.padding(top = 8.dp)
-            .background( // Logic for updating the color of the text fields
-                if (checkAnswer(inputText1, countryMap[randomImagePainter1.toString()] ?: "")) Color.Green
-            else Color.Red)
-    )
-
-    Image(
-        painter = randomImagePainter2,
-        contentDescription = "Random Flag 2",
-        modifier = Modifier
-            .size(180.dp)
-            .clip(shape = RoundedCornerShape(5.dp))
-            .border(2.dp, Color.Gray, shape = RoundedCornerShape(5.dp))
-    )
-    // Text field for user input under second flag
-    TextField(
-        value = inputText2,
-        onValueChange = { inputText2 = it },
-        modifier = Modifier.padding(top = 8.dp)
-            .background( // Logic for updating the color of the text fields
-                if (checkAnswer(inputText2, countryMap[randomImagePainter2.toString()] ?: "")) Color.Green
-                else Color.Red)
-    )
-
-    Image(
-        painter = randomImagePainter3,
-        contentDescription = "Random Flag 3",
-        modifier = Modifier
-            .size(180.dp)
-            .clip(shape = RoundedCornerShape(5.dp))
-            .border(2.dp, Color.Gray, shape = RoundedCornerShape(5.dp))
-    )
-    // Text field for user input under third flag
-    TextField(
-        value = inputText3,
-        onValueChange = { inputText3 = it },
-        modifier = Modifier.padding(top = 8.dp)
-            .background( // Logic for updating the color of the text fields
-                if (checkAnswer(inputText3, countryMap[randomImagePainter3.toString()] ?: "")) Color.Green
-                else Color.Red)
-    )
-    Button(onClick = {
-
-        val correctAnswer1 = countryMap[flagResourceIds[randomIndex1].toString()] ?: ""
-        val correctAnswer2 = countryMap[flagResourceIds[randomIndex2].toString()] ?: ""
-        val correctAnswer3 = countryMap[flagResourceIds[randomIndex3].toString()] ?: ""
-
-        val isAnswer1Correct = checkAnswer(inputText1, correctAnswer1)
-        val isAnswer2Correct = checkAnswer(inputText2, correctAnswer2)
-        val isAnswer3Correct = checkAnswer(inputText3, correctAnswer3)
-
-        if (isAnswer1Correct) {
-            inputText1 = correctAnswer1
-        }
-
-        if (isAnswer2Correct) {
-            inputText2 = correctAnswer2
-        }
-
-        if (isAnswer3Correct) {
-            inputText3 = correctAnswer3
-        }
-
-
-    }) {
-        Text(text = "Submit")
-
-    }
-}
-}*/
-
-
-/* Function to check user answers
-fun checkAnswers() {
-    val correctAnswer1 = countryMap[randomImagePainter1.toString()] ?: ""
-    val correctAnswer2 = countryMap[randomImagePainter2.toString()] ?: ""
-    val correctAnswer3 = countryMap[randomImagePainter3.toString()] ?: ""
-
-    // Check first answer
-    if (inputText1.equals(correctAnswer1, ignoreCase = true)) {
-        inputText1 = correctAnswer1
-    } else {
-        inputText1 = inputText1 // Keep the user's input as it is
-    }
-
-    // Check second answer
-    if (inputText2.equals(correctAnswer2, ignoreCase = true)) {
-        inputText2 = correctAnswer2
-    } else {
-        inputText2 = inputText2 // Keep the user's input as it is
-    }
-
-    // Check third answer
-    if (inputText3.equals(correctAnswer3, ignoreCase = true)) {
-        inputText3 = correctAnswer3
-    } else {
-        inputText3 = inputText3 // Keep the user's input as it is
-    }
-}
-*/
 
